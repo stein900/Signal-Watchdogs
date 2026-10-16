@@ -1,0 +1,57 @@
+Signal Watchdogs — surveillance des écrans noirs (écrans · GPU · USB/USB-C · RDP)
+===========================================================================
+
+INSTALLATION
+  Lancer SignalWatchdogs-Setup-<version>.exe (droits administrateur requis pour installer).
+  - Installe dans C:\Program Files\Signal Watchdogs (dossier protégé : les utilisateurs ne peuvent pas modifier l'exe).
+  - Ajoute Signal Watchdogs au menu Démarrer.
+  - Option cochée par défaut : lancement automatique, réduit dans la zone de notification, à l'ouverture
+    de session de chaque utilisateur. L'application tourne alors avec les droits de l'utilisateur, pas en administrateur.
+  - Page « Journaux » : laisser vide pour des journaux locaux, ou indiquer un partage réseau dédié (voir plus bas).
+  Prérequis : Windows 10 (1809+) ou 11 64 bits, .NET Framework 4.8 (déjà intégré à Windows).
+
+  Signal Watchdogs fonctionne entièrement en local : aucun port ouvert, aucune connexion sortante, aucune télémétrie.
+  Le seul accès réseau possible est l'écriture des journaux, si vous choisissez un partage.
+
+DÉPLOIEMENT SILENCIEUX (GPO, Intune, SCCM, script)
+  SignalWatchdogs-Setup-<version>.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+  Options :  /LOGDIR=\\serveur\wd-logs$        dossier des journaux commun (vue parc)
+             /MERGETASKS="!autostart"          sans lancement automatique
+             /LOG="C:\chemin\install.log"      journal de l'installation
+  Une mise à jour s'installe par-dessus l'ancienne version, avec la même commande.
+
+DÉSINSTALLATION
+  Paramètres > Applications > Signal Watchdogs, ou en silencieux :
+  "C:\Program Files\Signal Watchdogs\unins000.exe" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+  Les journaux (C:\ProgramData\Signal Watchdogs) sont conservés ; la désinstallation interactive propose de les supprimer.
+
+UTILISATION
+  1. Double-cliquer sur l'icône Signal Watchdogs dans la zone de notification pour ouvrir le tableau de bord.
+     Fermer la fenêtre ne coupe PAS la surveillance (clic droit sur l'icône > Quitter pour arrêter).
+  2. Chaque anomalie (écran perdu, plantage du pilote graphique, dock USB-C qui décroche, redémarrage
+     de DWM, session RDP…) crée un INCIDENT avec sa cause probable et les actions à mener.
+  3. Quand un écran devient noir, appuyer sur  Ctrl + Alt + Maj + B  : le signalement est corrélé avec
+     tout ce qui s'est passé dans les 2 minutes précédentes.
+  4. Bouton « Exporter le rapport HTML » : un fichier unique à envoyer au support / à l'équipe IT.
+
+FICHIERS
+  C:\Program Files\Signal Watchdogs\SignalWatchdogs.ini     réglages machine (posés par l'installation)
+  %LOCALAPPDATA%\Signal Watchdogs\SignalWatchdogs.ini        préférences de chaque utilisateur (onglet Paramètres)
+  C:\ProgramData\Signal Watchdogs\Logs\<POSTE>\        journaux :
+      signalwatchdogs-AAAA-MM-JJ.log          journal lisible
+      events-AAAA-MM-JJ.jsonl           tous les événements (JSON, 1 par ligne)
+      incidents-AAAA-MM-JJ.jsonl        incidents + diagnostic
+      metrics-AAAA-MM-JJ.csv            charge GPU / CPU / RAM / température toutes les 10 s
+      status.json                       résumé du poste (utilisé par la « Vue parc »)
+  Une instance lancée en administrateur écrit, par sécurité, dans C:\Program Files\Signal Watchdogs\SignalWatchdogs_Logs.
+
+PLUSIEURS POSTES (vue parc)
+  Indiquer à l'installation (/LOGDIR=…) un partage DÉDIÉ aux journaux. Droits conseillés : chaque utilisateur
+  peut créer un dossier et écrire dans LE SIEN uniquement (CREATOR OWNER) ; la lecture de l'ensemble est
+  réservée à l'IT. Les journaux contiennent des noms d'utilisateurs, des heures de session et des adresses IP
+  RDP : ce sont des données personnelles (RGPD), à protéger et à conserver peu de temps (60 jours par défaut).
+
+LIGNE DE COMMANDE
+  SignalWatchdogs.exe --minimized                 démarre directement dans la zone de notification
+  SignalWatchdogs.exe --report C:\rapport.html    analyse le poste sans interface et écrit un rapport
+  SignalWatchdogs.exe --logdir \\serveur\wd-logs$ force le dossier des journaux

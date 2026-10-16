@@ -1,0 +1,23 @@
+# Compilation (contient des chemins locaux et la source NuGet interne)
+bin/
+obj/
+*.pdb
+
+# Livrables : setup, exe portable, dossier d'audit interne (à diffuser via les Releases GitHub, pas le dépôt)
+dist/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+
+# Données produites par une exécution locale (noms d'utilisateurs, IP RDP, n° de série…)
+SignalWatchdogs_Logs/
+SignalWatchdogs.ini
+*.log
+*.jsonl
+metrics-*.csv
+status.json
+rapport*.html
